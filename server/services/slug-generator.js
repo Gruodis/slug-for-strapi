@@ -76,10 +76,11 @@ module.exports = ({ strapi }) => ({
    * Generates slug for entry
    * @param {object} data - entry data
    * @param {string} contentType - content type
-   * @param {string} documentId - document ID
+   * @param {object} currentEntity - current entity (for updates)
    * @returns {Promise<string|null>} - generated slug or null
    */
-  async generateSlugForEntry(data, contentType, documentId = null) {
+  async generateSlugForEntry(data, contentType, currentEntity = null) {
+    const documentId = currentEntity?.documentId;
     console.log(`🔍 [Slug For Strapi] generateSlugForEntry called for ${contentType}`);
     console.log(`📋 [Slug For Strapi] Data:`, JSON.stringify(data, null, 2));
     
@@ -97,6 +98,16 @@ module.exports = ({ strapi }) => ({
     const contentTypeConfig = config.contentTypes[contentType];
     if (contentTypeConfig && contentTypeConfig.enabled === false) {
       console.log(`⚠️ [Slug For Strapi] Generation disabled for ${contentType}`);
+      return null;
+    }
+
+    // Check if slug generation is skipped (manually locked)
+    // Check both data (new value) and currentEntity (existing value)
+    const isSkipped = data[config.skipGenerationField] === true || 
+                     (data[config.skipGenerationField] === undefined && currentEntity?.[config.skipGenerationField] === true);
+
+    if (isSkipped) {
+      console.log(`⚠️ [Slug For Strapi] Slug generation skipped due to manual override (${config.skipGenerationField} is true)`);
       return null;
     }
 
