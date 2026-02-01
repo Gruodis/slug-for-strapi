@@ -49,7 +49,10 @@ module.exports = ({ strapi }) => {
           // Generate slug only if it's missing or needs update
           if (data.title || data.name) {
             // Get current entity
-            const currentEntity = await strapi.db.query(uid).findOne({ where });
+            const currentEntity = await strapi.db.query(uid).findOne({ 
+              where,
+              populate: [pluginConfig.skipGenerationField || 'skipSlugGeneration']
+            });
             
             // Try to generate slug (service decides whether to update or not)
             const slug = await slugService.generateSlugForEntry(data, uid, currentEntity);
