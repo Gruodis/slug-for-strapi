@@ -1,5 +1,5 @@
 {
-  "name": "slug-for-strapi",
+  "name": "@gruodis/slug-for-strapi",
   "version": "1.0.0",
   "description": "Does what it says. Slug for Strapi.",
   "main": "strapi-server.js",
@@ -12,10 +12,7 @@
     "plugin",
     "slug",
     "auto-generation",
-    "rich-text",
-    "cyrillic",
-    "universal",
-    "content-types"
+    "universal"
   ],
   "author": "Gruodis",
   "license": "MIT",

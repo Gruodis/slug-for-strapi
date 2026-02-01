@@ -3,9 +3,9 @@
 ## 🚀 Installation
 
 ```bash
-npm install slug-for-strapi
+npm install @gruodis/slug-for-strapi
 # or
-yarn add slug-for-strapi
+yarn add @gruodis/slug-for-strapi
 ```
 
 ## Config
@@ -16,12 +16,12 @@ yarn add slug-for-strapi
 module.exports = {
   'slug-for-strapi': {
     enabled: true,
+    resolve: './node_modules/@gruodis/slug-for-strapi', // Path to the plugin
     config: {
       enabled: true,                    // Enable/disable plugin globally
       sourceField: 'title',             // Primary field to generate slug from
       fallbackField: 'name',            // Fallback field if primary is empty
       addSuffixForUnique: true,         // Add suffixes for uniqueness
-      supportCyrillic: false,            // Support Cyrillic transliteration
       updateExistingSlugs: true,        // Update existing slugs when title changes
       slugifyOptions: {
         lower: true,
