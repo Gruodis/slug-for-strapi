@@ -76,7 +76,15 @@ module.exports = ({ strapi }) => {
         return;
       }
 
+      // Check if route already exists (plugin might re-initialize)
       const routePath = `/api/${pluralName}/slug/:slug`;
+      const routes = strapi.server.router.stack.filter(layer => layer.path === routePath);
+      
+      if (routes.length > 0) {
+        console.log(`ℹ️ [Slug For Strapi] Route already exists, skipping: GET ${routePath}`);
+        return;
+      }
+
       console.log(`🛣️ [Slug For Strapi] Registering route: GET ${routePath}`);
 
       // Add route to Strapi Koa router

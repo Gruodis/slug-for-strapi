@@ -1,19 +1,5 @@
 # Slug For Strapi
 
-🔗 Universal auto slug generator for all Strapi content types
-
-## ✨ Features
-
-- **Universal** - Works with ANY content type that has a `slug` field
-- **Rich Text Support** - Removed in favor of simplicity. Works with string fields.
-- **Multiple Field Types** - Supports string fields
-- **Cyrillic Support** - Proper transliteration of Russian/Cyrillic characters
-- **Smart Uniqueness** - Automatically adds suffixes (-1, -2, -3) for unique slugs
-- **Auto-discovery** - Automatically finds and processes all content types with slug fields
-- **Configurable** - Update existing slugs or keep them unchanged
-- **Zero Configuration** - Works out of the box with sensible defaults
-- **🌐 Multi-locale Support** - Choose from 9 different locales for transliteration (ru, en, de, fr, es, it, pl, tr, lt)
-
 ## 🚀 Installation
 
 ```bash
@@ -22,9 +8,9 @@ npm install slug-for-strapi
 yarn add slug-for-strapi
 ```
 
-## ⚙️ Configuration
+## Config
 
-Add the plugin to your `config/plugins.js` or `config/plugins.ts`:
+`config/plugins.ts`:
 
 ```javascript
 module.exports = {
@@ -35,12 +21,12 @@ module.exports = {
       sourceField: 'title',             // Primary field to generate slug from
       fallbackField: 'name',            // Fallback field if primary is empty
       addSuffixForUnique: true,         // Add suffixes for uniqueness
-      supportCyrillic: true,            // Support Cyrillic transliteration
+      supportCyrillic: false,            // Support Cyrillic transliteration
       updateExistingSlugs: true,        // Update existing slugs when title changes
       slugifyOptions: {
         lower: true,
         strict: true,
-        locale: 'ru'
+        locale: 'lt'
       }
     }
   }
@@ -75,14 +61,6 @@ module.exports = {
   }
 }
 ```
-
-## 🎯 How it Works
-
-1. **Auto-discovery**: Plugin scans all content types for `slug` fields
-2. **Lifecycle hooks**: Registers `beforeCreate` and `beforeUpdate` hooks
-3. **Smart text extraction**: Automatically detects and processes string fields
-4. **Slug generation**: Uses `slugify` with Cyrillic support
-5. **Uniqueness check**: Ensures all slugs are unique within the content type
 
 ## 🔧 API Endpoints
 
@@ -121,26 +99,9 @@ Response:
 
 Will generate: `my-article-title`
 
-## 🌍 Multi-locale Support
+## Multi-locale Support
 
 The plugin supports different locales for transliteration. You can change the locale in your `config/plugins.ts`.
-
-### Available Locales
-
-| Locale | Language | Example |
-|--------|----------|---------|
-| `en` | English | `My Article` → `my-article` |
-
-
-### Examples
-
-**Russian locale (`ru`):**
-- `My Article` → `my-article`
-- `Test Entry` → `test-entry`
-
-**English locale (`en`):**
-- `My Article` → `my-article`
-- `Test Entry` → `test-entry`
 
 ## 🔧 Development
 
@@ -154,19 +115,6 @@ npm install
 npm run build
 ```
 
-## 🤝 Contributing
-
-Contributions are welcome! Please read our contributing guidelines before submitting PRs.
-
 ## 📄 License
 
-MIT License - see LICENSE file for details.
-
-## 🐛 Issues
-
-Found a bug? Please create an issue on [GitHub](https://github.com/Gruodis/slug-for-strapi/issues).
-
-## 📦 Related
-
-- [Strapi Documentation](https://docs.strapi.io/)
-- [Strapi Plugin Development](https://docs.strapi.io/dev-docs/plugins-development)
+MIT License.

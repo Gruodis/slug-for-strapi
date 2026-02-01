@@ -7,11 +7,10 @@ module.exports = {
     sourceField: 'title', // Primary field to generate slug from
     fallbackField: 'name', // Fallback field if primary is empty
     addSuffixForUnique: true, // Add suffixes for uniqueness (-1, -2, -3)
-    supportCyrillic: true, // Cyrillic support
     slugifyOptions: {
       lower: true,
       strict: true,
-      locale: 'ru'
+      locale: 'lt'
     },
     
     // Content-types settings (filled automatically)

@@ -1,7 +1,7 @@
 {
   "name": "slug-for-strapi",
   "version": "1.0.0",
-  "description": "Universal auto slug generator for all Strapi content types with full Rich Text support (Blocks + Classic)",
+  "description": "Does what it says. Slug for Strapi.",
   "main": "strapi-server.js",
   "scripts": {
     "develop": "tsc -w",
@@ -30,7 +30,7 @@
   "strapi": {
     "name": "slug-for-strapi",
     "displayName": "Slug For Strapi",
-    "description": "Universal auto slug generator for all content types",
+    "description": "Does what it says. Slug for Strapi.",
     "kind": "plugin"
   },
   "dependencies": {
@@ -42,5 +42,15 @@
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=6.0.0"
-  }
+  },
+  "files": [
+    "dist",
+    "server",
+    "admin",
+    "strapi-admin.js",
+    "strapi-server.js",
+    "package.json",
+    "README.md",
+    "LICENSE"
+  ]
 } 
