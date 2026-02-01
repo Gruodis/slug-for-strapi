@@ -12,7 +12,7 @@ module.exports = ({ strapi }) => ({
     try {
       // Use Strapi v5 Documents API to handle Draft/Publish and Locales correctly
       // Map publicationState to status (default to 'published')
-      const status = publicationState === 'preview' ? 'draft' : 'published';
+      const status = publicationState === 'preview' || publicationState === 'draft' ? 'draft' : 'published';
 
       const entity = await strapi.documents(uid).findFirst({
         filters: { slug },
