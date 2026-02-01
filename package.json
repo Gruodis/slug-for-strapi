@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Does what it says. Slug for Strapi.",
   "main": "strapi-server.js",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "develop": "tsc -w",
     "build": "tsc",
