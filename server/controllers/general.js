@@ -3,15 +3,22 @@
 module.exports = ({ strapi }) => ({
   async findBySlug(ctx) {
     const { uid, slug } = ctx.params;
+    const { locale, publicationState } = ctx.query;
 
     if (!uid || !slug) {
       return ctx.badRequest('Missing uid or slug');
     }
 
     try {
-      const entity = await strapi.db.query(uid).findOne({
-        where: { slug },
-        populate: true,
+      // Use Strapi v5 Documents API to handle Draft/Publish and Locales correctly
+      // Map publicationState to status (default to 'published')
+      const status = publicationState === 'preview' ? 'draft' : 'published';
+
+      const entity = await strapi.documents(uid).findFirst({
+        filters: { slug },
+        locale: locale || undefined, // If not provided, Strapi defaults (usually to all or default locale depending on config)
+        status: status,
+        populate: ctx.query.populate, // Pass populate param from query
       });
 
       if (!entity) {
