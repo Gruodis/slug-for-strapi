@@ -53,6 +53,11 @@ module.exports = ({ strapi }) => {
               where,
               populate: [pluginConfig.skipGenerationField || 'skipSlugGeneration']
             });
+
+            if (!currentEntity) {
+              console.warn(`⚠️ [Slug For Strapi] Could not find entity for update. Where:`, where);
+              return;
+            }
             
             // Try to generate slug (service decides whether to update or not)
             const slug = await slugService.generateSlugForEntry(data, uid, currentEntity);
