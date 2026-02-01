@@ -25,11 +25,11 @@ module.exports = ({ strapi }) => ({
    * Generates unique slug
    * @param {string} text - source text
    * @param {string} contentType - content type
-   * @param {string} documentId - document ID (to exclude from check)
+   * @param {number|string} excludeId - ID to exclude from check (for updates)
    * @param {object} options - slugify options
    * @returns {Promise<string>} - unique slug
    */
-  async generateUniqueSlug(text, contentType, documentId = null, options = {}) {
+  async generateUniqueSlug(text, contentType, excludeId = null, options = {}) {
     if (!text) {
       console.log('⚠️ [Slug For Strapi] Empty text for slug generation');
       return '';
@@ -55,7 +55,7 @@ module.exports = ({ strapi }) => ({
       const existing = await strapi.db.query(contentType).findOne({
         where: { 
           slug: slug,
-          ...(documentId && { documentId: { $ne: documentId } })
+          ...(excludeId && { id: { $ne: excludeId } })
         }
       });
 
@@ -80,7 +80,7 @@ module.exports = ({ strapi }) => ({
    * @returns {Promise<string|null>} - generated slug or null
    */
   async generateSlugForEntry(data, contentType, currentEntity = null) {
-    const documentId = currentEntity?.documentId;
+    const excludeId = currentEntity?.id;
     console.log(`🔍 [Slug For Strapi] generateSlugForEntry called for ${contentType}`);
     console.log(`📋 [Slug For Strapi] Data:`, JSON.stringify(data, null, 2));
     
@@ -151,7 +151,7 @@ module.exports = ({ strapi }) => ({
     const slug = await this.generateUniqueSlug(
       sourceText,
       contentType,
-      documentId,
+      excludeId,
       config.slugifyOptions
     );
 
