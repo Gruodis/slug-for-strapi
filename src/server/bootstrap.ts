@@ -1,6 +1,6 @@
-'use strict';
+import type { Core } from '@strapi/strapi';
 
-module.exports = ({ strapi }) => {
+export default ({ strapi }: { strapi: Core.Strapi }) => {
   // Register universal lifecycle hooks at Strapi startup
   const registerSlugLifecycles = () => {
     console.log('🚀 [Slug For Strapi] Initializing plugin...');
@@ -28,7 +28,7 @@ module.exports = ({ strapi }) => {
         models: [uid],
         
         // beforeCreate hook
-        async beforeCreate(event) {
+        async beforeCreate(event: any) {
           const { data } = event.params;
           console.log(`🆕 [Slug For Strapi] beforeCreate for ${uid}:`, data.title || data.name);
           
@@ -42,7 +42,7 @@ module.exports = ({ strapi }) => {
         },
 
         // beforeUpdate hook
-        async beforeUpdate(event) {
+        async beforeUpdate(event: any) {
           const { data, where } = event.params;
           console.log(`🔄 [Slug For Strapi] beforeUpdate for ${uid}:`, data.title || data.name);
           
@@ -85,7 +85,7 @@ module.exports = ({ strapi }) => {
 
       // Check if route already exists (plugin might re-initialize)
       const routePath = `/api/${pluralName}/slug/:slug`;
-      const routes = strapi.server.router.stack.filter(layer => layer.path === routePath);
+      const routes = strapi.server.router.stack.filter((layer: any) => layer.path === routePath);
       
       if (routes.length > 0) {
         console.log(`ℹ️ [Slug For Strapi] Route already exists, skipping: GET ${routePath}`);
@@ -95,7 +95,7 @@ module.exports = ({ strapi }) => {
       console.log(`🛣️ [Slug For Strapi] Registering route: GET ${routePath}`);
 
       // Add route to Strapi Koa router
-      strapi.server.router.get(routePath, async (ctx, next) => {
+      strapi.server.router.get(routePath, async (ctx: any, next: any) => {
         // Add UID to params for controller
         ctx.params.uid = uid;
         
@@ -107,4 +107,4 @@ module.exports = ({ strapi }) => {
 
   // Run registration after full Strapi initialization
   registerSlugLifecycles();
-}; 
+};

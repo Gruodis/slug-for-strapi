@@ -1,14 +1,14 @@
-'use strict';
+import type { Core } from '@strapi/strapi';
+import slugify from 'slugify';
+import type { PluginConfig, ContentTypeWithSlug } from '../types';
 
-const slugify = require('slugify');
-
-module.exports = ({ strapi }) => ({
+export default ({ strapi }: { strapi: Core.Strapi }) => ({
   /**
    * Extracts text from field (string)
    * @param {any} fieldValue - field value
    * @returns {string} - text for slug generation
    */
-  extractTextFromField(fieldValue) {
+  extractTextFromField(fieldValue: any): string {
     if (!fieldValue) return '';
 
     // If it's a regular string
@@ -29,14 +29,14 @@ module.exports = ({ strapi }) => ({
    * @param {object} options - slugify options
    * @returns {Promise<string>} - unique slug
    */
-  async generateUniqueSlug(text, contentType, excludeId = null, options = {}) {
+  async generateUniqueSlug(text: string, contentType: string, excludeId: string | null = null, options: any = {}): Promise<string> {
     if (!text) {
       console.log('⚠️ [Slug For Strapi] Empty text for slug generation');
       return '';
     }
 
     // Get settings from Strapi config
-    const config = strapi.config.get('plugin.slug-for-strapi');
+    const config = strapi.config.get('plugin.slug-for-strapi') as PluginConfig;
     
     // Generate base slug with settings from configuration
     const baseSlug = slugify(text, {
@@ -79,13 +79,13 @@ module.exports = ({ strapi }) => ({
    * @param {object} currentEntity - current entity (for updates)
    * @returns {Promise<string|null>} - generated slug or null
    */
-  async generateSlugForEntry(data, contentType, currentEntity = null) {
+  async generateSlugForEntry(data: any, contentType: string, currentEntity: any = null): Promise<string | null> {
     const excludeId = currentEntity?.documentId;
     console.log(`🔍 [Slug For Strapi] generateSlugForEntry called for ${contentType}`);
     console.log(`📋 [Slug For Strapi] Data:`, JSON.stringify(data, null, 2));
     
     // Get current settings from Strapi config
-    const config = strapi.config.get('plugin.slug-for-strapi');
+    const config = strapi.config.get('plugin.slug-for-strapi') as PluginConfig;
     console.log(`⚙️ [Slug For Strapi] Configuration:`, config);
     
     // Check if plugin is enabled globally
@@ -164,9 +164,9 @@ module.exports = ({ strapi }) => ({
    * Processes all content-types and finds those with slug field
    * @returns {Array} - list of content-types with slug field
    */
-  getContentTypesWithSlug() {
+  getContentTypesWithSlug(): ContentTypeWithSlug[] {
     const contentTypes = strapi.contentTypes;
-    const typesWithSlug = [];
+    const typesWithSlug: ContentTypeWithSlug[] = [];
 
     for (const [uid, contentType] of Object.entries(contentTypes)) {
       // Skip system types
@@ -187,4 +187,4 @@ module.exports = ({ strapi }) => ({
     console.log('📋 [Slug For Strapi] Found content-types with slug field:', typesWithSlug);
     return typesWithSlug;
   }
-}); 
+});

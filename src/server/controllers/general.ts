@@ -1,7 +1,7 @@
-'use strict';
+import type { Core } from '@strapi/strapi';
 
-module.exports = ({ strapi }) => ({
-  async findBySlug(ctx) {
+export default ({ strapi }: { strapi: Core.Strapi }) => ({
+  async findBySlug(ctx: any) {
     const { uid, slug } = ctx.params;
     const { locale, publicationState } = ctx.query;
 
@@ -26,7 +26,7 @@ module.exports = ({ strapi }) => ({
       const sanitizedQuery = await strapi.contentAPI.sanitize.query(queryToValidate, contentType, { auth: ctx.state.auth });
 
       // Use Strapi v5 Documents API to handle Draft/Publish and Locales correctly
-      const findParams = {
+      const findParams: any = {
         filters: { slug },
         populate: sanitizedQuery.populate || '*', // Use sanitized populate or default to '*'
       };
@@ -58,7 +58,7 @@ module.exports = ({ strapi }) => ({
         return ctx.notFound();
       }
 
-      const sanitizedEntity = await strapi.contentAPI.sanitize.output(entity, strapi.getModel(uid), {
+      const sanitizedEntity: any = await strapi.contentAPI.sanitize.output(entity, strapi.getModel(uid), {
         auth: ctx.state.auth,
       });
 
@@ -66,13 +66,13 @@ module.exports = ({ strapi }) => ({
       if (sanitizedEntity && sanitizedEntity.localizations && Array.isArray(sanitizedEntity.localizations)) {
         sanitizedEntity.localizations = sanitizedEntity.localizations
           .filter(
-            (loc) =>
+            (loc: any) =>
               loc &&
               typeof loc.documentId !== 'undefined' &&
               typeof loc.slug !== 'undefined' &&
               typeof loc.locale !== 'undefined'
           )
-          .map(loc => ({
+          .map((loc: any) => ({
             documentId: loc.documentId,
             slug: loc.slug,
             locale: loc.locale

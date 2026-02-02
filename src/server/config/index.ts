@@ -1,6 +1,4 @@
-'use strict';
-
-module.exports = {
+export default {
   default: {
     // Global settings
     enabled: true,
@@ -20,7 +18,7 @@ module.exports = {
       // 'api::page.page': { enabled: true },
     }
   },
-  validator: (config) => {
+  validator: (config: any) => {
     // Configuration validation
     if (typeof config.enabled !== 'boolean') {
       throw new Error('enabled must be a boolean');
@@ -29,4 +27,4 @@ module.exports = {
       throw new Error('sourceField must be a string');
     }
   },
-}; 
+};
