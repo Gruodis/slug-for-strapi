@@ -10,22 +10,43 @@ module.exports = ({ strapi }) => ({
     }
 
     try {
+      const contentType = strapi.contentType(uid);
+
+      // Prepare query for validation/sanitization
+      // We exclude publicationState as it's a v4 legacy param we handle manually
+      const queryToValidate = { ...ctx.query };
+      delete queryToValidate.publicationState;
+
+      // Validate the query (throws if invalid)
+      await strapi.contentAPI.validate.query(queryToValidate, contentType, { auth: ctx.state.auth });
+
+      // Sanitize the query to ensure only allowed fields/relations are populated
+      const sanitizedQuery = await strapi.contentAPI.sanitize.query(queryToValidate, contentType, { auth: ctx.state.auth });
+
       // Use Strapi v5 Documents API to handle Draft/Publish and Locales correctly
       // Map publicationState to status (default to 'published')
       const status = publicationState === 'preview' || publicationState === 'draft' ? 'draft' : 'published';
 
-      const entity = await strapi.documents(uid).findFirst({
+      const findParams = {
         filters: { slug },
-        locale: locale || undefined, // If not provided, Strapi defaults (usually to all or default locale depending on config)
         status: status,
-        populate: ctx.query.populate || '*', // Pass populate param from query or default to '*'
-      });
+        populate: sanitizedQuery.populate || '*', // Use sanitized populate or default to '*'
+      };
+
+      // Only set locale if it's explicitly provided, otherwise let Strapi default to the default locale
+      if (locale) {
+        findParams.locale = locale;
+      }
+
+      const entity = await strapi.documents(uid).findFirst(findParams);
 
       if (!entity) {
         return ctx.notFound();
       }
 
-      const sanitizedEntity = await strapi.contentAPI.sanitize.output(entity, strapi.getModel(uid));
+      const sanitizedEntity = await strapi.contentAPI.sanitize.output(entity, strapi.getModel(uid), {
+        auth: ctx.state.auth,
+      });
 
       // Filter localizations to include only specific fields if they exist
       if (sanitizedEntity.localizations && Array.isArray(sanitizedEntity.localizations)) {
