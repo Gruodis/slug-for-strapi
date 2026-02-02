@@ -9,6 +9,7 @@
   "scripts": {
     "develop": "tsc -w",
     "build": "tsc",
+    "prepublishOnly": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 0"
   },
   "keywords": [
