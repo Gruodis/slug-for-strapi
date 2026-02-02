@@ -16,6 +16,8 @@ module.exports = ({ strapi }) => ({
       // We exclude publicationState as it's a v4 legacy param we handle manually
       const queryToValidate = { ...ctx.query };
       delete queryToValidate.publicationState;
+      // We exclude locale as it's handled manually as Documents API param
+      delete queryToValidate.locale;
 
       // Validate the query (throws if invalid)
       await strapi.contentAPI.validate.query(queryToValidate, contentType, { auth: ctx.state.auth });
@@ -50,11 +52,19 @@ module.exports = ({ strapi }) => ({
 
       // Filter localizations to include only specific fields if they exist
       if (sanitizedEntity.localizations && Array.isArray(sanitizedEntity.localizations)) {
-        sanitizedEntity.localizations = sanitizedEntity.localizations.map(loc => ({
-          documentId: loc.documentId,
-          slug: loc.slug,
-          locale: loc.locale
-        }));
+        sanitizedEntity.localizations = sanitizedEntity.localizations
+          .filter(
+            (loc) =>
+              loc &&
+              typeof loc.documentId !== 'undefined' &&
+              typeof loc.slug !== 'undefined' &&
+              typeof loc.locale !== 'undefined'
+          )
+          .map(loc => ({
+            documentId: loc.documentId,
+            slug: loc.slug,
+            locale: loc.locale
+          }));
       }
 
       ctx.body = { data: sanitizedEntity };
