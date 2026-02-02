@@ -1,6 +1,38 @@
-'use strict';
+export interface Strapi {
+  config: {
+    get: (path: string) => any;
+  };
+  db: {
+    lifecycles: {
+      subscribe: (options: {
+        models: string[];
+        beforeCreate?: (event: { params: { data: Record<string, any> } }) => Promise<void>;
+        beforeUpdate?: (event: { params: { data: Record<string, any>; where: Record<string, any> } }) => Promise<void>;
+      }) => void;
+    };
+    query: (uid: string) => {
+      findOne: (params: { where: Record<string, any> }) => Promise<any>;
+    };
+  };
+  contentTypes: Record<string, any>;
+  server: {
+    router: {
+      get: (path: string, handler: (ctx: any, next?: any) => Promise<void>) => void;
+      stack: Array<{ path: string }>;
+    };
+  };
+  plugin: (name: string) => {
+    service: (name: string) => {
+      generateSlugForEntry: (data: Record<string, any>, uid: string, currentEntity?: any) => Promise<string | null>;
+      getContentTypesWithSlug: () => Array<{ uid: string; displayName: string }>;
+    };
+    controller: (name: string) => {
+      findBySlug: (ctx: any, next?: any) => Promise<void>;
+    };
+  };
+}
 
-module.exports = ({ strapi }) => {
+export default ({ strapi }: { strapi: Strapi }): void => {
   // Register universal lifecycle hooks at Strapi startup
   const registerSlugLifecycles = () => {
     console.log('🚀 [Slug For Strapi] Initializing plugin...');
@@ -74,7 +106,7 @@ module.exports = ({ strapi }) => {
     console.log(`✅ [Slug For Strapi] Plugin initialized for ${contentTypesWithSlug.length} content-types`);
 
     // Register findBySlug routes for each content-type
-    contentTypesWithSlug.forEach(({ uid, displayName }) => {
+    contentTypesWithSlug.forEach(({ uid }) => {
       const contentType = strapi.contentTypes[uid];
       const pluralName = contentType.info.pluralName;
       
@@ -85,7 +117,7 @@ module.exports = ({ strapi }) => {
 
       // Check if route already exists (plugin might re-initialize)
       const routePath = `/api/${pluralName}/slug/:slug`;
-      const routes = strapi.server.router.stack.filter(layer => layer.path === routePath);
+      const routes = strapi.server.router.stack.filter((layer: { path: string }) => layer.path === routePath);
       
       if (routes.length > 0) {
         console.log(`ℹ️ [Slug For Strapi] Route already exists, skipping: GET ${routePath}`);
@@ -95,7 +127,7 @@ module.exports = ({ strapi }) => {
       console.log(`🛣️ [Slug For Strapi] Registering route: GET ${routePath}`);
 
       // Add route to Strapi Koa router
-      strapi.server.router.get(routePath, async (ctx, next) => {
+      strapi.server.router.get(routePath, async (ctx: any, next?: any) => {
         // Add UID to params for controller
         ctx.params.uid = uid;
         
@@ -107,4 +139,4 @@ module.exports = ({ strapi }) => {
 
   // Run registration after full Strapi initialization
   registerSlugLifecycles();
-}; 
+};

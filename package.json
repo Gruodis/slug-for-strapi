@@ -1,15 +1,33 @@
 {
   "name": "@gruodis/slug-for-strapi",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Does what it says. Slug for Strapi.",
-  "main": "strapi-server.js",
+  "source": "./src/server/index.ts",
+  "main": "./dist/server/index.js",
+  "module": "./dist/server/index.mjs",
+  "types": "./dist/server/index.d.ts",
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
-    "develop": "tsc -w",
-    "build": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 0"
+    "develop": "pack-up watch",
+    "build": "pack-up build",
+    "test": "jest"
+  },
+  "exports": {
+    "./strapi-server": {
+      "source": "./src/server/index.ts",
+      "import": "./dist/server/index.mjs",
+      "require": "./dist/server/index.js",
+      "default": "./dist/server/index.js"
+    },
+    "./strapi-admin": {
+      "source": "./src/admin/index.ts",
+      "import": "./dist/admin/index.mjs",
+      "require": "./dist/admin/index.js",
+      "default": "./dist/admin/index.js"
+    },
+    "./package.json": "./package.json"
   },
   "keywords": [
     "strapi",
@@ -46,12 +64,16 @@
   },
   "files": [
     "dist",
-    "server",
-    "admin",
     "strapi-admin.js",
     "strapi-server.js",
     "package.json",
     "README.md",
     "LICENSE"
-  ]
-} 
+  ],
+  "devDependencies": {
+    "@strapi/pack-up": "^5.1.1",
+    "@types/jest": "^30.0.0",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.6"
+  }
+}
