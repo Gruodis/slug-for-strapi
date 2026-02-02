@@ -26,12 +26,8 @@ module.exports = ({ strapi }) => ({
       const sanitizedQuery = await strapi.contentAPI.sanitize.query(queryToValidate, contentType, { auth: ctx.state.auth });
 
       // Use Strapi v5 Documents API to handle Draft/Publish and Locales correctly
-      // Map publicationState to status (default to 'published')
-      const status = publicationState === 'preview' || publicationState === 'draft' ? 'draft' : 'published';
-
       const findParams = {
         filters: { slug },
-        status: status,
         populate: sanitizedQuery.populate || '*', // Use sanitized populate or default to '*'
       };
 
@@ -40,7 +36,23 @@ module.exports = ({ strapi }) => ({
         findParams.locale = locale;
       }
 
-      const entity = await strapi.documents(uid).findFirst(findParams);
+      // Handle publicationState mapping
+      // 'preview' -> draft (fallback to published handled by logic if needed, but standard is draft)
+      // 'draft' -> draft
+      // 'live' (or others) -> published
+      if (publicationState === 'preview' || publicationState === 'draft') {
+        findParams.status = 'draft';
+      } else {
+        findParams.status = 'published';
+      }
+
+      let entity = await strapi.documents(uid).findFirst(findParams);
+
+      // If 'preview' mode and no draft found, try to find published version
+      if (!entity && publicationState === 'preview') {
+        findParams.status = 'published';
+        entity = await strapi.documents(uid).findFirst(findParams);
+      }
 
       if (!entity) {
         return ctx.notFound();
@@ -51,7 +63,7 @@ module.exports = ({ strapi }) => ({
       });
 
       // Filter localizations to include only specific fields if they exist
-      if (sanitizedEntity.localizations && Array.isArray(sanitizedEntity.localizations)) {
+      if (sanitizedEntity && sanitizedEntity.localizations && Array.isArray(sanitizedEntity.localizations)) {
         sanitizedEntity.localizations = sanitizedEntity.localizations
           .filter(
             (loc) =>
