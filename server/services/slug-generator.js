@@ -25,11 +25,11 @@ module.exports = ({ strapi }) => ({
    * Generates unique slug
    * @param {string} text - source text
    * @param {string} contentType - content type
-   * @param {string} documentId - document ID (to exclude from check)
+   * @param {number|string} excludeId - ID to exclude from check (for updates)
    * @param {object} options - slugify options
    * @returns {Promise<string>} - unique slug
    */
-  async generateUniqueSlug(text, contentType, documentId = null, options = {}) {
+  async generateUniqueSlug(text, contentType, excludeId = null, options = {}) {
     if (!text) {
       console.log('⚠️ [Slug For Strapi] Empty text for slug generation');
       return '';
@@ -55,7 +55,7 @@ module.exports = ({ strapi }) => ({
       const existing = await strapi.db.query(contentType).findOne({
         where: { 
           slug: slug,
-          ...(documentId && { documentId: { $ne: documentId } })
+          ...(excludeId && { documentId: { $ne: excludeId } })
         }
       });
 
@@ -76,10 +76,11 @@ module.exports = ({ strapi }) => ({
    * Generates slug for entry
    * @param {object} data - entry data
    * @param {string} contentType - content type
-   * @param {string} documentId - document ID
+   * @param {object} currentEntity - current entity (for updates)
    * @returns {Promise<string|null>} - generated slug or null
    */
-  async generateSlugForEntry(data, contentType, documentId = null) {
+  async generateSlugForEntry(data, contentType, currentEntity = null) {
+    const excludeId = currentEntity?.documentId;
     console.log(`🔍 [Slug For Strapi] generateSlugForEntry called for ${contentType}`);
     console.log(`📋 [Slug For Strapi] Data:`, JSON.stringify(data, null, 2));
     
@@ -97,6 +98,17 @@ module.exports = ({ strapi }) => ({
     const contentTypeConfig = config.contentTypes[contentType];
     if (contentTypeConfig && contentTypeConfig.enabled === false) {
       console.log(`⚠️ [Slug For Strapi] Generation disabled for ${contentType}`);
+      return null;
+    }
+
+    // Check if slug generation is skipped (manually locked)
+    const skipField = config.skipGenerationField || 'skipSlugGeneration';
+    // Check both data (new value) and currentEntity (existing value)
+    const isSkipped = data[skipField] === true || 
+                     (data[skipField] === undefined && currentEntity?.[skipField] === true);
+
+    if (isSkipped) {
+      console.log(`⚠️ [Slug For Strapi] Slug generation skipped due to manual override (${skipField} is true)`);
       return null;
     }
 
@@ -140,7 +152,7 @@ module.exports = ({ strapi }) => ({
     const slug = await this.generateUniqueSlug(
       sourceText,
       contentType,
-      documentId,
+      excludeId,
       config.slugifyOptions
     );
 

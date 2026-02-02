@@ -22,6 +22,7 @@ module.exports = {
       sourceField: 'title',             // Primary field to generate slug from
       fallbackField: 'name',            // Fallback field if primary is empty
       addSuffixForUnique: true,         // Add suffixes for uniqueness
+      skipGenerationField: 'skipSlugGeneration', // Field to check if slug generation should be skipped (optional)
       updateExistingSlugs: true,        // Update existing slugs when title changes
       slugifyOptions: {
         lower: true,
@@ -57,8 +58,29 @@ module.exports = {
     "slug": {
       "type": "uid",
       "targetField": "title"
+    },
+    "skipSlugGeneration": {
+      "type": "boolean",
+      "default": false
     }
   }
+}
+```
+
+## 🔒 Manual Slug Override (Locking)
+
+To prevent the slug from being auto-updated when you edit the title, you can "lock" it.
+
+1.  Add a **Boolean** field to your content type (e.g., named `skipSlugGeneration`).
+2.  Enable this field in the "Configure the view" section of your Content Manager (e.g., place it next to the slug).
+3.  When checking this box, the plugin will **not** regenerate the slug, preserving whatever value is in the `slug` field.
+
+You can customize the field name in the plugin configuration:
+
+```javascript
+config: {
+  // ...
+  skipGenerationField: 'myCustomLockField', // Default is 'skipSlugGeneration'
 }
 ```
 

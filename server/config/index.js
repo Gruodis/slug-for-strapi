@@ -6,6 +6,7 @@ module.exports = {
     enabled: true,
     sourceField: 'title', // Primary field to generate slug from
     fallbackField: 'name', // Fallback field if primary is empty
+    skipGenerationField: 'skipSlugGeneration', // Field to check if slug generation should be skipped
     addSuffixForUnique: true, // Add suffixes for uniqueness (-1, -2, -3)
     slugifyOptions: {
       lower: true,
