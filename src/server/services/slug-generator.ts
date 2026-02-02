@@ -1,14 +1,46 @@
-'use strict';
+import slugify from 'slugify';
 
-const slugify = require('slugify');
+export interface Strapi {
+  config: {
+    get: (path: string) => any;
+  };
+  db: {
+    query: (uid: string) => {
+      findOne: (params: { where: Record<string, any> }) => Promise<any>;
+    };
+  };
+  contentTypes: Record<string, any>;
+}
 
-module.exports = ({ strapi }) => ({
+export interface SlugGeneratorService {
+  extractTextFromField(fieldValue: any): string;
+  generateUniqueSlug(
+    text: string,
+    contentType: string,
+    excludeId?: number | string | null,
+    options?: Record<string, any>
+  ): Promise<string>;
+  generateSlugForEntry(
+    data: Record<string, any>,
+    contentType: string,
+    currentEntity?: Record<string, any> | null
+  ): Promise<string | null>;
+  getContentTypesWithSlug(): Array<{
+    uid: string;
+    displayName: string;
+    hasSlugField: boolean;
+    hasTitleField: boolean;
+    hasNameField: boolean;
+  }>;
+}
+
+export default ({ strapi }: { strapi: Strapi }): SlugGeneratorService => ({
   /**
    * Extracts text from field (string)
-   * @param {any} fieldValue - field value
-   * @returns {string} - text for slug generation
+   * @param fieldValue - field value
+   * @returns text for slug generation
    */
-  extractTextFromField(fieldValue) {
+  extractTextFromField(fieldValue: any): string {
     if (!fieldValue) return '';
 
     // If it's a regular string
@@ -23,13 +55,18 @@ module.exports = ({ strapi }) => ({
 
   /**
    * Generates unique slug
-   * @param {string} text - source text
-   * @param {string} contentType - content type
-   * @param {number|string} excludeId - ID to exclude from check (for updates)
-   * @param {object} options - slugify options
-   * @returns {Promise<string>} - unique slug
+   * @param text - source text
+   * @param contentType - content type
+   * @param excludeId - ID to exclude from check (for updates)
+   * @param options - slugify options
+   * @returns unique slug
    */
-  async generateUniqueSlug(text, contentType, excludeId = null, options = {}) {
+  async generateUniqueSlug(
+    text: string,
+    contentType: string,
+    excludeId: number | string | null = null,
+    options: Record<string, any> = {}
+  ): Promise<string> {
     if (!text) {
       console.log('⚠️ [Slug For Strapi] Empty text for slug generation');
       return '';
@@ -74,12 +111,16 @@ module.exports = ({ strapi }) => ({
 
   /**
    * Generates slug for entry
-   * @param {object} data - entry data
-   * @param {string} contentType - content type
-   * @param {object} currentEntity - current entity (for updates)
-   * @returns {Promise<string|null>} - generated slug or null
+   * @param data - entry data
+   * @param contentType - content type
+   * @param currentEntity - current entity (for updates)
+   * @returns generated slug or null
    */
-  async generateSlugForEntry(data, contentType, currentEntity = null) {
+  async generateSlugForEntry(
+    data: Record<string, any>,
+    contentType: string,
+    currentEntity: Record<string, any> | null = null
+  ): Promise<string | null> {
     const excludeId = currentEntity?.documentId;
     console.log(`🔍 [Slug For Strapi] generateSlugForEntry called for ${contentType}`);
     console.log(`📋 [Slug For Strapi] Data:`, JSON.stringify(data, null, 2));
@@ -162,9 +203,15 @@ module.exports = ({ strapi }) => ({
 
   /**
    * Processes all content-types and finds those with slug field
-   * @returns {Array} - list of content-types with slug field
+   * @returns list of content-types with slug field
    */
-  getContentTypesWithSlug() {
+  getContentTypesWithSlug(): Array<{
+    uid: string;
+    displayName: string;
+    hasSlugField: boolean;
+    hasTitleField: boolean;
+    hasNameField: boolean;
+  }> {
     const contentTypes = strapi.contentTypes;
     const typesWithSlug = [];
 
@@ -187,4 +234,4 @@ module.exports = ({ strapi }) => ({
     console.log('📋 [Slug For Strapi] Found content-types with slug field:', typesWithSlug);
     return typesWithSlug;
   }
-}); 
+});

@@ -1,6 +1,24 @@
-'use strict';
+export interface PluginConfig {
+  enabled: boolean;
+  sourceField: string;
+  fallbackField: string;
+  skipGenerationField: string;
+  addSuffixForUnique: boolean;
+  slugifyOptions: {
+    lower: boolean;
+    strict: boolean;
+    locale: string;
+  };
+  contentTypes: Record<string, { enabled?: boolean }>;
+  updateExistingSlugs?: boolean;
+}
 
-module.exports = {
+export interface ConfigModule {
+  default: PluginConfig;
+  validator: (config: PluginConfig) => void;
+}
+
+const config: ConfigModule = {
   default: {
     // Global settings
     enabled: true,
@@ -20,7 +38,7 @@ module.exports = {
       // 'api::page.page': { enabled: true },
     }
   },
-  validator: (config) => {
+  validator: (config: PluginConfig) => {
     // Configuration validation
     if (typeof config.enabled !== 'boolean') {
       throw new Error('enabled must be a boolean');
@@ -29,4 +47,6 @@ module.exports = {
       throw new Error('sourceField must be a string');
     }
   },
-}; 
+};
+
+export default config;
