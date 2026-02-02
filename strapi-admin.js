@@ -1,6 +1,6 @@
 'use strict';
 
-export default {
+module.exports = {
   register(app) {
     // Registration of link in main menu removed, as settings are done via config file
     // app.addMenuLink({...});

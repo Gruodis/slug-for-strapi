@@ -127,15 +127,22 @@ The plugin supports different locales for transliteration. You can change the lo
 
 ## 🔧 Development
 
+This plugin is written in TypeScript and requires building before use.
+
 ```bash
-
-
 # Install dependencies
 npm install
 
-# Build the plugin
+# Build the plugin (compiles TypeScript to JavaScript)
 npm run build
+
+# Watch mode for development
+npm run develop
 ```
+
+### TypeScript
+
+The plugin is written in TypeScript with source files in `src/` and compiled output in `dist/`. The `prepublishOnly` script ensures the plugin is built before publishing to npm.
 
 ## 📄 License
 

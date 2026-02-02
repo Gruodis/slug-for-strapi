@@ -9,6 +9,7 @@
   "scripts": {
     "develop": "tsc -w",
     "build": "tsc",
+    "prepublishOnly": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 0"
   },
   "keywords": [
@@ -46,12 +47,15 @@
   },
   "files": [
     "dist",
-    "server",
-    "admin",
     "strapi-admin.js",
     "strapi-server.js",
     "package.json",
     "README.md",
     "LICENSE"
-  ]
-} 
+  ],
+  "devDependencies": {
+    "@strapi/strapi": "^5.34.0",
+    "@types/node": "^25.2.0",
+    "typescript": "^5.9.3"
+  }
+}
