@@ -55,7 +55,7 @@ module.exports = ({ strapi }) => ({
       const existing = await strapi.db.query(contentType).findOne({
         where: { 
           slug: slug,
-          ...(excludeId && { id: { $ne: excludeId } })
+          ...(excludeId && { documentId: { $ne: excludeId } })
         }
       });
 
@@ -80,7 +80,7 @@ module.exports = ({ strapi }) => ({
    * @returns {Promise<string|null>} - generated slug or null
    */
   async generateSlugForEntry(data, contentType, currentEntity = null) {
-    const excludeId = currentEntity?.id;
+    const excludeId = currentEntity?.documentId;
     console.log(`🔍 [Slug For Strapi] generateSlugForEntry called for ${contentType}`);
     console.log(`📋 [Slug For Strapi] Data:`, JSON.stringify(data, null, 2));
     

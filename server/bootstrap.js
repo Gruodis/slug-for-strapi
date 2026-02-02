@@ -50,8 +50,7 @@ module.exports = ({ strapi }) => {
           if (data.title || data.name) {
             // Get current entity
             const currentEntity = await strapi.db.query(uid).findOne({ 
-              where,
-              populate: [pluginConfig.skipGenerationField || 'skipSlugGeneration']
+              where
             });
 
             if (!currentEntity) {
