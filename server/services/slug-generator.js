@@ -102,12 +102,13 @@ module.exports = ({ strapi }) => ({
     }
 
     // Check if slug generation is skipped (manually locked)
+    const skipField = config.skipGenerationField || 'skipSlugGeneration';
     // Check both data (new value) and currentEntity (existing value)
-    const isSkipped = data[config.skipGenerationField] === true || 
-                     (data[config.skipGenerationField] === undefined && currentEntity?.[config.skipGenerationField] === true);
+    const isSkipped = data[skipField] === true || 
+                     (data[skipField] === undefined && currentEntity?.[skipField] === true);
 
     if (isSkipped) {
-      console.log(`⚠️ [Slug For Strapi] Slug generation skipped due to manual override (${config.skipGenerationField} is true)`);
+      console.log(`⚠️ [Slug For Strapi] Slug generation skipped due to manual override (${skipField} is true)`);
       return null;
     }
 
