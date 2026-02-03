@@ -1,5 +1,5 @@
 export interface Strapi {
-  contentType: (uid: string) => any;
+  contentTypes: Record<string, any>;
   contentAPI: {
     validate: {
       query: (query: Record<string, any>, contentType: any, options: { auth?: any }) => Promise<void>;
@@ -57,7 +57,7 @@ export default ({ strapi }: { strapi: Strapi }): GeneralController => ({
     }
 
     try {
-      const contentType = strapi.contentType(uid);
+      const contentType = strapi.contentTypes[uid];
 
       // Prepare query for validation/sanitization
       // We exclude publicationState as it's a v4 legacy param we handle manually
