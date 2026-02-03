@@ -78,6 +78,11 @@ export default ({ strapi }: { strapi: Strapi }): GeneralController => ({
         populate: sanitizedQuery.populate || '*', // Use sanitized populate or default to '*'
       };
 
+      // Apply fields if present in sanitized query
+      if (sanitizedQuery.fields) {
+        findParams.fields = sanitizedQuery.fields;
+      }
+
       // Only set locale if it's explicitly provided, otherwise let Strapi default to the default locale
       if (locale) {
         findParams.locale = locale;
@@ -105,7 +110,7 @@ export default ({ strapi }: { strapi: Strapi }): GeneralController => ({
         return ctx.notFound();
       }
 
-      const sanitizedEntity = await strapi.contentAPI.sanitize.output(entity, strapi.getModel(uid), {
+      const sanitizedEntity = await strapi.contentAPI.sanitize.output(entity, contentType, {
         auth: ctx.state.auth,
       });
 
