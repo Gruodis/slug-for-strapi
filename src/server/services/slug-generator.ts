@@ -73,7 +73,7 @@ export default ({ strapi }: { strapi: Strapi }): SlugGeneratorService => ({
     }
 
     // Get settings from Strapi config
-    const config = strapi.config.get('plugin.slug-for-strapi');
+    const config = strapi.config.get('plugin::slug-for-strapi');
     
     // Generate base slug with settings from configuration
     const baseSlug = slugify(text, {
@@ -126,7 +126,7 @@ export default ({ strapi }: { strapi: Strapi }): SlugGeneratorService => ({
     console.log(`📋 [Slug For Strapi] Data:`, JSON.stringify(data, null, 2));
     
     // Get current settings from Strapi config
-    const config = strapi.config.get('plugin.slug-for-strapi');
+    const config = strapi.config.get('plugin::slug-for-strapi');
     console.log(`⚙️ [Slug For Strapi] Configuration:`, config);
     
     // Check if plugin is enabled globally

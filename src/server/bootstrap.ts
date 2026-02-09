@@ -38,7 +38,7 @@ export default ({ strapi }: { strapi: Strapi }): void => {
     console.log('🚀 [Slug For Strapi] Initializing plugin...');
     
     // Get plugin configuration from Strapi
-    const pluginConfig = strapi.config.get('plugin.slug-for-strapi') || {};
+    const pluginConfig = strapi.config.get('plugin::slug-for-strapi') || {};
     console.log('⚙️ [Slug For Strapi] Plugin configuration:', pluginConfig);
     
     const slugService = strapi.plugin('slug-for-strapi').service('slug-generator');

@@ -11,6 +11,8 @@ export interface PluginConfig {
   };
   contentTypes: Record<string, { enabled?: boolean }>;
   updateExistingSlugs?: boolean;
+  defaultPopulateDepth: number;
+  populateDepth: Record<string, number>;
 }
 
 export interface ConfigModule {
@@ -31,6 +33,8 @@ const config: ConfigModule = {
       strict: true,
       locale: 'lt'
     },
+    defaultPopulateDepth: 5, // Default depth for deep populate
+    populateDepth: {}, // Per-content-type depth overrides
     
     // Content-types settings (filled automatically)
     contentTypes: {
