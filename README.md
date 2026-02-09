@@ -28,6 +28,11 @@ module.exports = {
         lower: true,
         strict: true,
         locale: 'lt'
+      },
+      defaultPopulateDepth: 5,          // Default depth for deep populate (optional, default: 5)
+      populateDepth: {                  // Per-content-type depth overrides (optional)
+        'api::article.article': 10,
+        'api::category.category': 2
       }
     }
   }
@@ -78,10 +83,10 @@ To prevent the slug from being auto-updated when you edit the title, you can "lo
 You can customize the field name in the plugin configuration:
 
 ```javascript
-config: {
-  // ...
-  skipGenerationField: 'myCustomLockField', // Default is 'skipSlugGeneration'
-}
+    config: {
+      // ...
+      skipGenerationField: 'myCustomLockField', // Default is 'skipSlugGeneration'
+    }
 ```
 
 ## 🔧 API Endpoints
@@ -92,10 +97,16 @@ For every content type with a generated slug, the plugin automatically creates a
 
 - `GET /api/:pluralApiId/slug/:slug`
 
-Example:
+**Features:**
+- **Deep Populate by Default:** The endpoint automatically populates all nested components, dynamic zones, and relations up to a configurable depth (default: 5 levels deep).
+- **Localized:** Respects the requested locale.
+- **Draft/Published:** Respects the `publicationState` parameter (default: `live`).
+- **Sanitized:** Response is sanitized to remove sensitive fields based on user permissions.
+
+**Example:**
 - `GET /api/articles/slug/my-awesome-article`
 
-Response:
+**Response:**
 ```json
 {
   "data": {
@@ -103,12 +114,15 @@ Response:
     "documentId": "...",
     "title": "My Awesome Article",
     "slug": "my-awesome-article",
+    "seo": { ... }, // Populated component
+    "blocks": [ ... ], // Populated dynamic zone
+    "author": { ... }, // Populated relation
     ...
   }
 }
 ```
 
-> **Note:** These endpoints are read-only and public by default.
+> **Note:** These endpoints are read-only and public by default. You can control the depth of population globally or per-content-type using the plugin configuration (`defaultPopulateDepth` and `populateDepth`).
 
 ## 📝 Field Types Supported
 
