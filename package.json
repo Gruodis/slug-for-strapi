@@ -1,6 +1,6 @@
 {
   "name": "@gruodis/slug-for-strapi",
-  "version": "1.2.3",
+  "version": "1.2.6",
   "description": "Does what it says. Slug for Strapi.",
   "source": "./src/server/index.ts",
   "main": "./dist/server/index.js",
