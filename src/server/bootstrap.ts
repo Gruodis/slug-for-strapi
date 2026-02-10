@@ -20,7 +20,9 @@ export interface Strapi {
       get: (path: string, handler: (ctx: any, next?: any) => Promise<void>) => void;
       stack: Array<{ path: string }>;
     };
+    use: (middleware: (ctx: any, next: any) => Promise<void>) => void;
   };
+  controller: (uid: string) => any;
   plugin: (name: string) => {
     service: (name: string) => {
       generateSlugForEntry: (data: Record<string, any>, uid: string, currentEntity?: any) => Promise<string | null>;
@@ -104,6 +106,73 @@ export default ({ strapi }: { strapi: Strapi }): void => {
     });
     
     console.log(`✅ [Slug For Strapi] Plugin initialized for ${contentTypesWithSlug.length} content-types`);
+
+    // Override default controllers to inject populate patterns
+    const populatePatterns = pluginConfig.populatePatterns || {};
+    if (Object.keys(populatePatterns).length > 0) {
+      console.log('🔌 [Slug For Strapi] Injecting populate patterns into middlewares...');
+      
+      const apiPrefix = strapi.config.get('api.rest.prefix') || '/api';
+      const endpointsToPatterns: Record<string, any> = {};
+
+      for (const [uid, pattern] of Object.entries(populatePatterns)) {
+        if (!pattern) continue;
+        
+        const ct = strapi.contentTypes[uid];
+        if (!ct) continue;
+        
+        // Map both singular and plural routes just in case, though usually:
+        // collection types -> pluralName
+        // single types -> singularName
+        if (ct.kind === 'singleType') {
+          endpointsToPatterns[`${apiPrefix}/${ct.info.singularName}`] = pattern;
+        } else {
+          endpointsToPatterns[`${apiPrefix}/${ct.info.pluralName}`] = pattern;
+        }
+      }
+
+      // Inject global middleware to intercept API requests
+      strapi.server.use(async (ctx: any, next: any) => {
+        // Quick check path start
+        if (!ctx.path.startsWith(apiPrefix)) return next();
+
+        // Check if path matches any configured endpoint
+        // We match exact endpoint or endpoint/ (for collection types with params)
+        for (const [baseEndpoint, pattern] of Object.entries(endpointsToPatterns)) {
+          if (ctx.path === baseEndpoint || ctx.path.startsWith(`${baseEndpoint}/`)) {
+            // Check if we need to inject populate OR fields
+            const hasPopulate = !!ctx.query.populate;
+            const hasFields = !!ctx.query.fields;
+
+            if (!hasPopulate || !hasFields) {
+               // Check if pattern is a structured query object { fields: [], populate: {} }
+               // We assume 'fields' and 'populate' are reserved keys and not attribute names
+               const isStructured = pattern && (
+                 Object.prototype.hasOwnProperty.call(pattern, 'populate') || 
+                 Object.prototype.hasOwnProperty.call(pattern, 'fields')
+               );
+
+               if (isStructured) {
+                  if (!hasPopulate && pattern.populate) {
+                     ctx.query.populate = pattern.populate;
+                  }
+                  if (!hasFields && pattern.fields) {
+                     ctx.query.fields = pattern.fields;
+                  }
+               } else {
+                  // Standard behavior: treat pattern as the populate object
+                  if (!hasPopulate) {
+                     ctx.query.populate = pattern;
+                  }
+               }
+            }
+            break;
+          }
+        }
+        
+        await next();
+      });
+    }
 
     // Register findBySlug routes for each content-type
     contentTypesWithSlug.forEach(({ uid }) => {

@@ -113,10 +113,31 @@ export default ({ strapi }: { strapi: Strapi }): GeneralController => ({
       const specificDepth = pluginConfig?.populateDepth?.[uid];
       const targetDepth = specificDepth !== undefined ? specificDepth : defaultDepth;
 
-      // Build populate: if user didn't provide one, generate a deep populate based on schema
       let populate = sanitizedQuery.populate;
+      let fields = sanitizedQuery.fields;
+
       if (!populate) {
-        populate = getDeepPopulate(strapi, uid, targetDepth);
+        // Check for explicit populate pattern in config first
+        if (pluginConfig?.populatePatterns?.[uid]) {
+          const pattern = pluginConfig.populatePatterns[uid];
+          // Check if pattern is a structured query object { fields: [], populate: {} }
+          const isStructured = pattern && (
+            Object.prototype.hasOwnProperty.call(pattern, 'populate') || 
+            Object.prototype.hasOwnProperty.call(pattern, 'fields')
+          );
+
+          if (isStructured) {
+            populate = pattern.populate;
+            if (!fields) {
+              fields = pattern.fields;
+            }
+          } else {
+            // Standard populate object (or undefined)
+            populate = pattern;
+          }
+        } else {
+          populate = getDeepPopulate(strapi, uid, targetDepth);
+        }
       } else if (populate === '*') {
         // If user explicitly asked for '*', maybe they wanted deep? Strapi treats * as shallow.
         // For this plugin's specific goal, we can upgrade * to deep default too, but safer to respect explicit * if user meant shallow.
@@ -134,6 +155,9 @@ export default ({ strapi }: { strapi: Strapi }): GeneralController => ({
       // Apply fields if present in sanitized query
       if (sanitizedQuery.fields) {
         findParams.fields = sanitizedQuery.fields;
+      } else if (fields) {
+        // Use injected fields from populatePatterns
+        findParams.fields = fields;
       }
 
       // Only set locale if it's explicitly provided, otherwise let Strapi default to the default locale
