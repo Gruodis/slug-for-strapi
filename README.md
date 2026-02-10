@@ -33,6 +33,16 @@ module.exports = {
       populateDepth: {                  // Per-content-type depth overrides (optional)
         'api::article.article': 10,
         'api::category.category': 2
+      },
+      populatePatterns: {               // Per-content-type custom populate objects (optional)
+        'api::main-page.main-page': {
+          heroCardCarousel: {
+            populate: {
+              heroCards: true,
+            },
+          },
+          // ... more complex populate logic
+        }
       }
     }
   }
@@ -122,7 +132,47 @@ For every content type with a generated slug, the plugin automatically creates a
 }
 ```
 
-> **Note:** These endpoints are read-only and public by default. You can control the depth of population globally or per-content-type using the plugin configuration (`defaultPopulateDepth` and `populateDepth`).
+> **Note:** These endpoints are read-only and public by default. You can control the depth of population globally or per-content-type using the plugin configuration (`defaultPopulateDepth` and `populateDepth`), or provide a custom populate schema using `populatePatterns`.
+
+## ⚙️ Advanced Configuration
+
+### Custom Populate Patterns
+
+If `populateDepth` is not flexible enough, you can define exact populate objects for specific content types using `populatePatterns`. This is useful for single types or complex components structures where you need granular control.
+
+**Note:** This affects both the `findBySlug` endpoint (`/api/:pluralApiId/slug/:slug`) AND the standard `find` / `findOne` endpoints (`/api/:pluralApiId` and `/api/:pluralApiId/:documentId`) for that content type, automatically injecting the populate schema if no other populate parameter is provided.
+
+```javascript
+// config/plugins.ts
+'slug-for-strapi': {
+  config: {
+    // ...
+    populatePatterns: {
+      'api::main-page.main-page': {
+        heroCardCarousel: {
+          populate: {
+            heroCards: true,
+          },
+        },
+        seo: {
+          fields: ['metaTitle', 'metaDescription'],
+          populate: { shareImage: true }
+        }
+      },
+      // Example with top-level fields restriction:
+      'api::calendar-event.calendar-event': {
+        fields: ['title', 'slug', 'publishDate'],
+        populate: {
+          tags: true,
+          author: {
+            fields: ['name', 'email']
+          }
+        }
+      }
+    }
+  }
+}
+```
 
 ## 📝 Field Types Supported
 

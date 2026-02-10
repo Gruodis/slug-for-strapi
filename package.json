@@ -1,6 +1,6 @@
 {
   "name": "@gruodis/slug-for-strapi",
-  "version": "1.2.2",
+  "version": "1.2.6",
   "description": "Does what it says. Slug for Strapi.",
   "source": "./src/server/index.ts",
   "main": "./dist/server/index.js",
@@ -16,12 +16,14 @@
   },
   "exports": {
     "./strapi-server": {
+      "types": "./dist/server/index.d.ts",
       "source": "./src/server/index.ts",
       "import": "./dist/server/index.mjs",
       "require": "./dist/server/index.js",
       "default": "./dist/server/index.js"
     },
     "./strapi-admin": {
+      "types": "./dist/admin/index.d.ts",
       "source": "./src/admin/index.ts",
       "import": "./dist/admin/index.mjs",
       "require": "./dist/admin/index.js",
