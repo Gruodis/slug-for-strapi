@@ -3,6 +3,7 @@ import generalController from '../general';
 // Mock Strapi global
 const mockFindFirst = jest.fn();
 const mockConfigGet = jest.fn();
+
 const mockStrapi = {
   config: {
     get: mockConfigGet,
@@ -281,6 +282,58 @@ describe('General Controller', () => {
         populate: {
           comp1: { populate: '*' }
         }
+      }));
+    });
+
+    test('should use custom populate pattern from config', async () => {
+      const uid = 'api::custom.custom';
+      const slug = 'custom-slug';
+      const ctx = {
+        params: { uid, slug },
+        query: {},
+        state: { auth: {} },
+        badRequest: jest.fn(),
+      };
+
+      const mockSanitizedQuery = { 
+        populate: undefined,
+        fields: ['title'] 
+      };
+      const mockEntity = { id: 1, slug };
+      
+      const customPopulate = {
+        relation1: { fields: ['id', 'name'] },
+        component1: { populate: { image: true } }
+      };
+
+      (mockStrapi.contentAPI.sanitize.query as jest.Mock).mockResolvedValue(mockSanitizedQuery);
+      mockFindFirst.mockResolvedValue(mockEntity);
+      (mockStrapi.contentAPI.sanitize.output as jest.Mock).mockResolvedValue(mockEntity);
+      
+      // Mock config to return custom populate pattern for this uid
+      mockConfigGet.mockReturnValue({
+        populatePatterns: {
+          [uid]: customPopulate
+        }
+      });
+
+      // Mock schema (doesn't matter much here as we bypass getDeepPopulate)
+      (mockStrapi.getModel as jest.Mock).mockImplementation((modelUid) => {
+        if (modelUid === uid) {
+          return {
+            attributes: {
+              relation1: { type: 'relation' },
+              component1: { type: 'component' }
+            }
+          };
+        }
+        return {};
+      });
+
+      await controller.findBySlug(ctx as any);
+
+      expect(mockFindFirst).toHaveBeenCalledWith(expect.objectContaining({
+        populate: customPopulate
       }));
     });
   });
