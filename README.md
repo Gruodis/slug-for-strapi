@@ -174,6 +174,91 @@ If `populateDepth` is not flexible enough, you can define exact populate objects
 }
 ```
 
+### 🏗️ Modular Configuration & Reusability
+
+For large projects with many content types, you can split your configuration into multiple files and reuse common patterns (like SEO or Image population) to avoid repetition.
+
+**1. Create a directory structure** (e.g., `config/slug/`):
+
+```
+config/
+└── slug/
+    ├── common.ts         # Shared patterns (SEO, Images)
+    ├── pages.ts          # Page-specific patterns
+    ├── blog.ts           # Blog-specific patterns
+    └── index.ts          # Main entry point
+```
+
+**2. Define shared patterns in `config/slug/common.ts`:**
+
+```typescript
+export const seoPopulate = {
+  seo: {
+    fields: ['metaTitle', 'metaDescription'],
+    populate: { shareImage: true }
+  }
+};
+
+export const imagePopulate = {
+  fields: ['name', 'url', 'alternativeText', 'width', 'height']
+};
+```
+
+**3. Use them in feature-specific files (e.g., `config/slug/blog.ts`):**
+
+```typescript
+import { seoPopulate, imagePopulate } from './common';
+
+export const blogPatterns = {
+  'api::article.article': {
+    populate: {
+      ...seoPopulate,
+      coverImage: {
+        populate: imagePopulate
+      },
+      author: {
+        fields: ['name'],
+        populate: { avatar: true }
+      }
+    }
+  }
+};
+```
+
+**4. Aggregate everything in `config/slug/index.ts`:**
+
+```typescript
+import { blogPatterns } from './blog';
+import { pagePatterns } from './pages';
+
+export const populatePatterns = {
+  ...blogPatterns,
+  ...pagePatterns,
+};
+
+export const populateDepth = {
+  'api::article.article': 10,
+  // ...
+};
+```
+
+**5. Import in `config/plugins.ts`:**
+
+```typescript
+import { populatePatterns, populateDepth } from './slug';
+
+export default ({ env }) => ({
+  // ...
+  'slug-for-strapi': {
+    // ...
+    config: {
+      populatePatterns,
+      populateDepth
+    }
+  }
+});
+```
+
 ## 📝 Field Types Supported
 
 ### Regular String
