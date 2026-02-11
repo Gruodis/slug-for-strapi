@@ -140,6 +140,11 @@ export default ({ strapi }: { strapi: Strapi }): void => {
         // We match exact endpoint or endpoint/ (for collection types with params)
         for (const [baseEndpoint, pattern] of Object.entries(endpointsToPatterns)) {
           if (ctx.path === baseEndpoint || ctx.path.startsWith(`${baseEndpoint}/`)) {
+            // Exclude plugin's own /slug/ routes from this middleware
+            if (ctx.path.includes('/slug/')) {
+              break;
+            }
+
             // Check if we need to inject populate OR fields
             const hasPopulate = !!ctx.query.populate;
             const hasFields = !!ctx.query.fields;
