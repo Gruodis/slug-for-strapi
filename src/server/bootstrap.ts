@@ -44,6 +44,8 @@ export default ({ strapi }: { strapi: Strapi }): void => {
     console.log('⚙️ [Slug For Strapi] Plugin configuration:', pluginConfig);
     
     const slugService = strapi.plugin('slug-for-strapi').service('slug-generator');
+    const restPrefixRaw = strapi.config.get('api.rest.prefix') || '/api';
+    const apiPrefix = restPrefixRaw.endsWith('/') ? restPrefixRaw.slice(0, -1) : restPrefixRaw;
     
     // Get all content-types with slug field
     const contentTypesWithSlug = slugService.getContentTypesWithSlug();
@@ -112,7 +114,6 @@ export default ({ strapi }: { strapi: Strapi }): void => {
     if (Object.keys(populatePatterns).length > 0) {
       console.log('🔌 [Slug For Strapi] Injecting populate patterns into middlewares...');
       
-      const apiPrefix = strapi.config.get('api.rest.prefix') || '/api';
       const endpointsToPatterns: Record<string, any> = {};
 
       for (const [uid, pattern] of Object.entries(populatePatterns)) {
@@ -190,7 +191,7 @@ export default ({ strapi }: { strapi: Strapi }): void => {
       }
 
       // Check if route already exists (plugin might re-initialize)
-      const routePath = `/api/${pluralName}/slug/:slug`;
+      const routePath = `${apiPrefix}/${pluralName}/slug/:slug`;
       const routes = strapi.server.router.stack.filter((layer: { path: string }) => layer.path === routePath);
       
       if (routes.length > 0) {
